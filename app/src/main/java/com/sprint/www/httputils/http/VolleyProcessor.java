@@ -51,7 +51,7 @@ public class VolleyProcessor  implements IHttpProcessor{
             @Override
             public void onResponse(String response) {
                 callBack.onSuccess(response);
-                if (debug) Log.e(TAG,response.toString());
+                if (debug) Log.e(TAG,response);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -70,6 +70,7 @@ public class VolleyProcessor  implements IHttpProcessor{
                 return params;
             }
         };
+
         // 请用缓存
         stringRequest.setShouldCache(is_use_cache);
 
@@ -83,7 +84,7 @@ public class VolleyProcessor  implements IHttpProcessor{
             @Override
             public void onResponse(String response) {
                 callBack.onSuccess(response);
-                if (debug) Log.e(TAG,response.toString());
+                if (debug) Log.e(TAG,response);
             }
         }, new Response.ErrorListener() {
             @Override
