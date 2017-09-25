@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
         tv = (TextView) findViewById(R.id.tv);
     }
 
-
     public void onBtn(View v){
         String url = "http://lf.snssdk.com/article/category/get_subscribed/v2/?";
         Map<String, Object> params = new HashMap<>();
