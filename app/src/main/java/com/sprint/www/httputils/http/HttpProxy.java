@@ -31,10 +31,23 @@ public class HttpProxy implements IHttpProcessor {
         return _instance;
     }
 
-    public static void init(IHttpProcessor httpProcessor){
+    public static HttpProxy init(IHttpProcessor httpProcessor){
         mIHttpProcessor = httpProcessor;
+        return _instance;
     }
 
+    //设置缓存
+    @Override
+    public  HttpProxy setCache(boolean isUseCache) {
+        mIHttpProcessor.setCache(isUseCache);
+        return _instance;
+    }
+    //设置请求头
+    @Override
+    public HttpProxy setHeader(Map<String, String> headers) {
+        mIHttpProcessor.setHeader(headers);
+        return _instance;
+    }
 
     @Override
     public void post(String url, Map<String, Object> params, ICallBack callBack) {
@@ -48,8 +61,8 @@ public class HttpProxy implements IHttpProcessor {
     }
 
     /**拼接url*/
-    public static String appendParams(String url, Map<String, Object> params) {
-        if (TextUtils.isEmpty(url) || params.isEmpty() ) {
+    private static String appendParams(String url, Map<String, Object> params) {
+        if (TextUtils.isEmpty(url) || params == null || params.isEmpty() ) {
             return url;
         }
         StringBuffer urlBuilder = new StringBuffer(url);

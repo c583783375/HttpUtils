@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public interface IHttpProcessor {
 
+    IHttpProcessor setCache(boolean isUseCache);//是否使用缓存
+    IHttpProcessor setHeader(Map<String, String> headers);//是否添加请求头
+
     void post(String url, Map<String,Object> params,ICallBack callBack);
 
     void get(String url, Map<String,Object> params,ICallBack callBack);

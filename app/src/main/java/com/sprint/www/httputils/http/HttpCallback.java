@@ -28,7 +28,5 @@ public abstract class HttpCallback<Result> implements ICallBack {
         Type[] params = ((ParameterizedType)genType).getActualTypeArguments();
         return (Class<?>)params[0];
     }
-    
-    
-    
+
 }
