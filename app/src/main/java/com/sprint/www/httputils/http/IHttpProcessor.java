@@ -1,5 +1,6 @@
 package com.sprint.www.httputils.http;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Map;
  * 邮箱：xmll17@163.com
  *    //网络请求 post get
  */
-public interface IHttpProcessor {
+interface IHttpProcessor {
 
     IHttpProcessor setCache(boolean isUseCache);//是否使用缓存
     IHttpProcessor setHeader(Map<String, String> headers);//是否添加请求头
@@ -16,4 +17,5 @@ public interface IHttpProcessor {
 
     void get(String url, Map<String,Object> params,ICallBack callBack);
 
+    void uploadFile(String url, File file, String fileKey, String fileType, Map<String, String> paramsMap, ICallBack callBack);
 }

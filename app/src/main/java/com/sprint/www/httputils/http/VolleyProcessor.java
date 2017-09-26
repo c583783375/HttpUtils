@@ -1,6 +1,7 @@
 package com.sprint.www.httputils.http;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -11,15 +12,18 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.net.Uri.encode;
 
 /**
  * 作者：Sprint  on 2017-09-24 23:12
  * 邮箱：xmll17@163.com
  * volley 工具类
  */
-public class VolleyProcessor  implements IHttpProcessor{
+public class VolleyProcessor implements IHttpProcessor, IConstants {
     private static final String TAG = "VolleyProcessor";
     private  boolean debug = true;
     private static RequestQueue mQueue = null;
@@ -42,12 +46,12 @@ public class VolleyProcessor  implements IHttpProcessor{
         this.headers = headers;
         return this;
     }
-
     /**使用POST*/
     @Override
     public void post(String url, Map<String, Object> params, final ICallBack callBack) {
+        String strUrl = appendParams(url, params);
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                url, new Response.Listener<String>() {
+                strUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 callBack.onSuccess(response);
@@ -79,8 +83,9 @@ public class VolleyProcessor  implements IHttpProcessor{
     /**使用GET*/
     @Override
     public void get(String url, Map<String, Object> params, final ICallBack callBack) {
+        String strUrl = appendParams(url, params);
         StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                url, new Response.Listener<String>() {
+                strUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 callBack.onSuccess(response);
@@ -111,4 +116,30 @@ public class VolleyProcessor  implements IHttpProcessor{
         mQueue.add(stringRequest);
     }
 
+    @Override
+    public void uploadFile(String url, File file, String fileKey, String fileType, Map<String, String> paramsMap, ICallBack callBack) {
+
+    }
+
+    /**
+     * 拼接url
+     */
+    private String appendParams(String url, Map<String, Object> params) {
+        if (TextUtils.isEmpty(url) || params == null || params.isEmpty()) {
+            return url;
+        }
+        StringBuffer urlBuilder = new StringBuffer(url);
+        if (urlBuilder.indexOf("?") <= 0) {
+            urlBuilder.append("?");
+        } else {
+            if (!urlBuilder.toString().endsWith("?")) {
+                urlBuilder.append("&");
+            }
+        }
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            urlBuilder.append(entry.getKey()).append("=").append(encode(entry.getValue().toString())).append("&");
+        }
+
+        return urlBuilder.deleteCharAt(urlBuilder.length() - 1).toString();
+    }
 }
