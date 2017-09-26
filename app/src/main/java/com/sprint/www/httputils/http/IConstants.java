@@ -1,6 +1,6 @@
 package com.sprint.www.httputils.http;
 
-interface IConstants {
+public interface IConstants {
     /**
      * 文件的类型
      */

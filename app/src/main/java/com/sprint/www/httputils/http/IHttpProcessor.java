@@ -8,7 +8,7 @@ import java.util.Map;
  * 邮箱：xmll17@163.com
  *    //网络请求 post get
  */
-interface IHttpProcessor {
+public interface IHttpProcessor {
 
     IHttpProcessor setCache(boolean isUseCache);//是否使用缓存
     IHttpProcessor setHeader(Map<String, String> headers);//是否添加请求头
