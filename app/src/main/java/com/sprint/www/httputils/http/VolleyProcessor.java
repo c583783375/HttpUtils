@@ -50,40 +50,29 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     @Override
     public void post(String url, Map<String, Object> params, final ICallBack callBack) {
         String strUrl = appendParams(url, params);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                strUrl, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                callBack.onSuccess(response);
-                if (debug) Log.e(TAG,response);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                callBack.onFailure(error.toString());
-                if (debug) Log.e(TAG,error.toString());
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                if( null != headers && !headers.isEmpty()){
-                    params = headers;
-                }
-                if (debug) Log.e(TAG,params.toString());
-                return params;
-            }
-        };
-
+        StringRequest stringRequest = getStringRequest(strUrl,Request.Method.POST,callBack);
         // 请用缓存
         stringRequest.setShouldCache(is_use_cache);
-
         mQueue.add(stringRequest);
     }
     /**使用GET*/
     @Override
-    public void get(String url, Map<String, Object> params, final ICallBack callBack) {
+    public void get(String url, Map<String, Object> params,  ICallBack callBack) {
         String strUrl = appendParams(url, params);
+        StringRequest stringRequest = getStringRequest(strUrl,Request.Method.GET,callBack);
+
+        // 请用缓存
+        stringRequest.setShouldCache(is_use_cache);
+        mQueue.add(stringRequest);
+    }
+    /**
+     * @param type 网络请求的方式  int GET = 0;int POST = 1;int PUT = 2;int DELETE = 3;
+     *               int HEAD = 4;int OPTIONS = 5;int TRACE = 6;int PATCH = 7;
+     *@param strUrl 网络请求的地址
+     * @param callBack 结果回调
+     *@return StringRequest
+     * */
+    private StringRequest getStringRequest(String strUrl, int type, final ICallBack callBack){
         StringRequest stringRequest = new StringRequest(Request.Method.GET,
                 strUrl, new Response.Listener<String>() {
             @Override
@@ -94,7 +83,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                callBack.onFailure(error.toString());
+                callBack.onFailure(State.FAILURE,error.toString());
                 if (debug) Log.e(TAG,error.toString());
             }
         }){
@@ -108,18 +97,24 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
 //                    headers.put("Content-Type", "application/x-javascript");
 //                    headers.put("Accept-Encoding", "gzip,deflate");
                 if (debug) Log.e(TAG,params.toString());
-                    return params;
+                return params;
             }
         };
-        // 请用缓存
-        stringRequest.setShouldCache(is_use_cache);
-        mQueue.add(stringRequest);
+        return stringRequest;
     }
 
+
+    /**文件上传*/
     @Override
-    public void uploadFile(String url, File file, String fileKey, String fileType, Map<String, String> paramsMap, ICallBack callBack) {
+    public void uploadFile(String url, File[] files, String[] filekeys, String[] fileTypes, Map<String, Object> paramsMap,ProgressListener listener ,ICallBack callBack) {
 
     }
+    /**文件下载*/
+    @Override
+    public void downLoadFile(String url, String fileDir, String filename, ProgressListener listener, ICallBack callback) {
+
+    }
+
 
     /**
      * 拼接url

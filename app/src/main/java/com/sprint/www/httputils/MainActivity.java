@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.sprint.www.httputils.bean.Content;
 import com.sprint.www.httputils.http.HttpCallback;
 import com.sprint.www.httputils.http.HttpProxy;
+import com.sprint.www.httputils.http.State;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +46,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String error) {
-                tv.setText(error);
+            public void onFailure(State state,String error) {
+                if(State.NETWORK_FAILURE == state){
+                    tv.setText(error);
+                }else{
+                    tv.setText(error);
+                }
+
             }
         });
     }

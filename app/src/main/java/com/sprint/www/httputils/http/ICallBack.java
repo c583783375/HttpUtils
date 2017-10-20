@@ -8,5 +8,5 @@ public interface ICallBack {
     //成功调用
     void onSuccess(String response);
     //失败调用
-    void onFailure(String error);
+    void onFailure(State state,String error);
 }

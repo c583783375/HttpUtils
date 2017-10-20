@@ -89,18 +89,33 @@ public class HttpProxy implements IHttpProcessor, IConstants {
     }
 
     /**
-     * post请求，上传单个文件
+     * post请求，上传单个或多个文件
      *
      * @param url：url
-     * @param file：File对象
-     * @param fileKey：上传参数时file对应的键
-     * @param fileType：File类型，是image，video，audio，file
+     * @param files：File对象的数组
+     * @param filekeys：上传参数时file对应的键数组
+     * @param fileTypes：Files类型数组，是image，video，audio，file
      * @param paramsMap：map集合，封装键值对参数
+     * @param listener：用来监听上传 进度回调
      * @param callBack：回调接口，onFailure方法在请求失败时调用，onResponse方法在请求成功后调用，这两个方法都执行在UI线程。还可以重写onProgress方法，得到上传进度
      */
     @Override
-    public void uploadFile(String url, File file, String fileKey, String fileType, Map<String, String> paramsMap, ICallBack callBack) {
-        //mIHttpProcessor.okHttpUploadFile();
+    public void uploadFile(String url, File[] files, String[] filekeys, String[] fileTypes,
+                           Map<String, Object> paramsMap,ProgressListener listener, ICallBack callBack) {
+        mIHttpProcessor.uploadFile(url,files,filekeys,fileTypes,paramsMap, listener,callBack);
+    }
+    /**
+     * post请求，下传单个文件
+     *
+     * @param url：url 下载文件服务器的地址
+     * @param fileDir： 目标文件夹
+     * @param filename：保存的文件名
+     * @param listener：用来监听下载 进度回调
+     * @param callback：回调接口，onFailure方法在请求失败时调用，onResponse方法在请求成功后调用，这两个方法都执行在UI线程。还可以重写onProgress方法，得到下载进度
+     */
+    @Override
+    public void downLoadFile(String url, String fileDir, String filename, ProgressListener listener, ICallBack callback) {
+        mIHttpProcessor.downLoadFile(url,fileDir,filename,listener,callback);
     }
 
 }
