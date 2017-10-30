@@ -1,5 +1,6 @@
 package com.sprint.www.httputils.http;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -137,11 +138,12 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
     }
     /**文件下传*/
     @Override
-    public void downLoadFile(String url, String fileDir, String filename, ProgressListener listener, ICallBack callback) {
+    public void downLoadFile(String url, String fileDir, ProgressListener listener, ICallBack callback) {
 
         final Request request = new Request.Builder()
                 .url(url)
                 .build();
+        String filename = getNameFromUrl(url);
         executeAsyn_DownloadWithListener(request,fileDir,filename,listener,callback);
     }
 
@@ -400,16 +402,13 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
                     int len = 0;//本次读取的字节数
                     long currSize = 0;//当前已经读取的字节数
                     //总大小
-                    long totalSize = Integer.valueOf(response.header("Content-Length", "-1"));
-
+                    final long totalSize = Integer.valueOf(response.header("Content-Length", "-1"));
+                    String savePath = isExistDir(fileDir);
                     FileOutputStream fos = null;
+
                     try {
                         is = response.body().byteStream(); //获取返回的Stream
-                        File dir = new File(fileDir);
-                        if (!dir.exists()) {
-                            dir.mkdirs();
-                        }
-                        File file = new File(fileDir, filename);
+                        File file = new File(savePath, filename);
 
                         fos = new FileOutputStream(file);
                         while ((len = is.read(buf)) != -1) {
@@ -417,7 +416,13 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
                             currSize += len;
                             //文件总长度从外部获得；
                             //因为是单文件下载，所以id永远为0，表示不起作用
-                            listener.onProgress(totalSize, currSize, totalSize == currSize, 0);
+                            final long finalCurrSize = currSize;
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listener.onProgress(totalSize, finalCurrSize, totalSize == finalCurrSize, 0);
+                                }
+                            });
                         }
                         fos.flush();
                         if (debug) Log.e(TAG,  "file has finished downloading.");
@@ -460,6 +465,36 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
                 }
             }
         });
+    }
+
+    /**
+     * @param saveDir
+     * @return
+     * @throws IOException
+     * 判断下载目录是否存在
+     */
+    private String isExistDir(String saveDir) throws IOException {
+        // 下载位置
+        File downloadFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), saveDir);
+        if (!downloadFile.mkdirs()) {
+            downloadFile.createNewFile();
+        }
+        String savePath = downloadFile.getAbsolutePath();
+        return savePath;
+    }
+    /**
+     * @param url
+     * @return
+     * 从下载连接中解析出文件名
+     */
+    @NonNull
+    private String getNameFromUrl(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
+    /** 取消所有请求 */
+    @Override
+    public void cancelAll(){
+        mClient.dispatcher().cancelAll();//取消所有请求
     }
 
 }

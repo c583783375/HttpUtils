@@ -1,18 +1,28 @@
 package com.sprint.www.httputils.http;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,8 +121,69 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     }
     /**文件下载*/
     @Override
-    public void downLoadFile(String url, String fileDir, String filename, ProgressListener listener, ICallBack callback) {
+    public void downLoadFile(String url, String fileDir,  ProgressListener listener, ICallBack callback) {
+        String filename =  getNameFromUrl(url);
+     /*   write2SDFromInput(url,filename,fileDir,listener,callback);*/
 
+    }
+
+/*
+    //将一个InoutStream里面的数据写入到SD卡中
+    public File write2SDFromInput(String fileUrl, String fileName,String fileDir, ProgressListener listener, ICallBack callback){
+
+        File file=null;
+        OutputStream output=null;
+        InputStream input = null;
+        try {
+            //创建一个URL对象
+            URL url=new URL(fileUrl);
+            //创建一个HTTP链接
+            HttpURLConnection urlConn=(HttpURLConnection)url.openConnection();
+            //使用IO流获取数据
+            input=urlConn.getInputStream();
+
+            //创建目录
+            String savePath = isExistDir(fileDir);
+            //创建文件
+            file = new File(savePath, fileName);
+            //写数据流
+            output=new FileOutputStream(file);
+            byte buffer[]=new byte[4*1024];//每次存4K
+            int temp;
+            //写入数据
+            while((temp=input.read(buffer))!=-1){
+                output.write(buffer,0,temp);
+            }
+            output.flush();
+        } catch (Exception e) {
+            System.out.println("写数据异常："+e);
+        }
+        finally{
+            try {
+                if(output != null){
+                    output.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if(input != null){
+                    input.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return file;
+    }
+*/
+
+
+
+    /**取消所有网络请求 */
+    @Override
+    public void cancelAll() {
+        mQueue.cancelAll(getClass());
     }
 
 
@@ -137,4 +208,31 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
 
         return urlBuilder.deleteCharAt(urlBuilder.length() - 1).toString();
     }
+
+    /**
+     * @param saveDir
+     * @return
+     * @throws IOException
+     * 判断下载目录是否存在
+     */
+    private String isExistDir(String saveDir) throws IOException {
+        // 下载位置
+        File downloadFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), saveDir);
+        if (!downloadFile.mkdirs()) {
+            downloadFile.createNewFile();
+        }
+        String savePath = downloadFile.getAbsolutePath();
+        return savePath;
+    }
+    /**
+     * @param url
+     * @return
+     * 从下载连接中解析出文件名
+     */
+    @NonNull
+    private String getNameFromUrl(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
+
+
 }

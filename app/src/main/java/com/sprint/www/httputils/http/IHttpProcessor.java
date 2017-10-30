@@ -19,5 +19,7 @@ public interface IHttpProcessor {
 
     void uploadFile(String url, File[] files, String[] filekeys, String[] fileTypes, Map<String, Object> paramsMap,ProgressListener listener ,ICallBack callBack);
 
-    void downLoadFile(String url, String fileDir, String filename, ProgressListener listener, ICallBack callback);
+    void downLoadFile(String url, String fileDir,  ProgressListener listener, ICallBack callback);
+
+    void cancelAll();
 }
