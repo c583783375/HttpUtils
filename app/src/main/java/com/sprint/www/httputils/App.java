@@ -3,7 +3,7 @@ package com.sprint.www.httputils;
 import android.app.Application;
 
 import com.sprint.www.httputils.http.HttpProxy;
-import com.sprint.www.httputils.http.OkHttpProcessor;
+import com.sprint.www.httputils.http.okhttp.OkHttpProcessor;
 
 import java.util.HashMap;
 import java.util.Map;

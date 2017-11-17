@@ -1,4 +1,4 @@
-package com.sprint.www.httputils.http;
+package com.sprint.www.httputils.http.utils;
 
 /**
  * 作者：Sprint  on 2017-09-24 22:45

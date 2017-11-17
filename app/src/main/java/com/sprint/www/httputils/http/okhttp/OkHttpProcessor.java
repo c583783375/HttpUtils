@@ -1,4 +1,4 @@
-package com.sprint.www.httputils.http;
+package com.sprint.www.httputils.http.okhttp;
 
 import android.os.Environment;
 import android.os.Handler;
@@ -7,10 +7,18 @@ import android.text.TextUtils;
 import android.util.Log;
 
 
+import com.sprint.www.httputils.http.utils.ICallBack;
+import com.sprint.www.httputils.http.utils.IConstants;
+import com.sprint.www.httputils.http.utils.IHttpProcessor;
+import com.sprint.www.httputils.http.utils.ProgressListener;
+import com.sprint.www.httputils.http.utils.State;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -68,7 +76,7 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
      * 异步请求
      */
     @Override
-    public void post(String url, Map<String, Object> params, final ICallBack callBack) {
+    public void post(String url, Map<String, String> params, final ICallBack callBack) {
         RequestBody requestBody = getRequestBody(params);
         Headers headers = getHeaders(mHeaders);
         Log.e(TAG, "post:" + appendParams(url, params).toString());
@@ -85,7 +93,7 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
      * 异步请求
      */
     @Override
-    public void get(String url, Map<String, Object> params, final ICallBack callBack) {
+    public void get(String url, Map<String, String> params, final ICallBack callBack) {
         String strUrl = appendParams(url, params);
         Log.e(TAG, "get:" + strUrl.toString());
         final Request request = new Request.Builder()
@@ -96,29 +104,58 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
     }
     /**文件上传*/
     @Override
-    public void uploadFile(String url,  File[] files, String[] filekeys, String[] fileTypes,
-                           Map<String, Object> paramsMap, ProgressListener listener ,ICallBack callBack) {
+    public void uploadFile(String url, Map<String, File> filesMap, String[] fileTypes,
+                           Map<String, String> paramsMap, ProgressListener listener , ICallBack callBack) {
+
+       // Map<String, File> filesMap = new HashMap<>();
         //封装请求数据
         // 1 form 表单形式上传
         MultipartBody.Builder requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
         //2.按顺序添加文件
-        if(files != null && files.length > 0){
-            for (int i = 0;i< files.length;i++){
+        Map<String, File> uploadFiles = new HashMap<>();
+        if(uploadFiles != null &&uploadFiles.size() > 0){
+            int i = 0;
+            Iterator iter = uploadFiles.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, File> entry = (Map.Entry) iter.next();
+                String key =  entry.getKey();
+                File val =  entry.getValue();
                 // MediaType.parse() 里面是上传的文件类型。 "file/*" "image/*" "audio/*" "video/*"
                 // "image/jpeg; charset=utf-8" "text/*" "application/octet-stream"
                 String filetype = FILE_TYOE_DEF;
-                if(fileTypes != null && filekeys.length > i){
-                    filetype = TextUtils.isEmpty(filekeys[i])?  FILE_TYOE_DEF :filekeys[i];
+                if(fileTypes != null && fileTypes.length > i){
+                    filetype = TextUtils.isEmpty(fileTypes[i])?  FILE_TYOE_DEF :fileTypes[i];
+                }else{
+                    filetype = FILE_TYOE_DEF;
                 }
                 //没有上传进度
-             //   RequestBody body = RequestBody.create(MediaType.parse(filetype), files[i]);
-                ProgressRequestBody body = new ProgressRequestBody(i,MediaType.parse(filetype),files[i],listener);
-
+                //   RequestBody body = RequestBody.create(MediaType.parse(filetype), files[i]);
+                ProgressRequestBody body = new ProgressRequestBody(i,MediaType.parse(filetype),val,listener);
                 // 参数分别为， 请求key ，文件名称 ， RequestBody
-                requestBody.addFormDataPart(filekeys[i], files[i].getName(), body);
+                requestBody.addFormDataPart(key, val.getName(), body);
+                i++;
             }
         }
+
+
+//        //2.按顺序添加文件
+//        if(files != null && files.length > 0){
+//            for (int i = 0;i< files.length;i++){
+//                // MediaType.parse() 里面是上传的文件类型。 "file/*" "image/*" "audio/*" "video/*"
+//                // "image/jpeg; charset=utf-8" "text/*" "application/octet-stream"
+//                String filetype = FILE_TYOE_DEF;
+//                if(fileTypes != null && filekeys.length > i){
+//                    filetype = TextUtils.isEmpty(filekeys[i])?  FILE_TYOE_DEF :filekeys[i];
+//                }
+//                //没有上传进度
+//             //   RequestBody body = RequestBody.create(MediaType.parse(filetype), files[i]);
+//                ProgressRequestBody body = new ProgressRequestBody(i,MediaType.parse(filetype),files[i],listener);
+//
+//                // 参数分别为， 请求key ，文件名称 ， RequestBody
+//                requestBody.addFormDataPart(filekeys[i], files[i].getName(), body);
+//            }
+//        }
         //3.添加参数
         if (paramsMap != null) {
             // map 里面是请求中所需要的 key 和 value
@@ -254,20 +291,20 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
 
     /*** 拼接posturl*/
     @NonNull
-    private RequestBody getRequestBody(Map<String, Object> params) {
+    private RequestBody getRequestBody(Map<String, String> params) {
         //把请求参数封装到RequestBody里面
         FormBody.Builder formBuilder = new FormBody.Builder();
         if (params == null || params.isEmpty()) {
             return formBuilder.build();
         }
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
+        for (Map.Entry<String, String> entry : params.entrySet()) {
             formBuilder.add(entry.getKey(), encode(entry.getValue().toString()));
         }
         return formBuilder.build();
     }
 
     /*** 拼接geturl*/
-    private String appendParams(String url, Map<String, Object> params) {
+    private String appendParams(String url, Map<String, String> params) {
         if (TextUtils.isEmpty(url) || params == null || params.isEmpty()) {
             return url;
         }
@@ -279,7 +316,7 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
                 urlBuilder.append("&");
             }
         }
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
+        for (Map.Entry<String, String> entry : params.entrySet()) {
             urlBuilder.append(entry.getKey()).append("=").append(encode(entry.getValue().toString())).append("&");
         }
 

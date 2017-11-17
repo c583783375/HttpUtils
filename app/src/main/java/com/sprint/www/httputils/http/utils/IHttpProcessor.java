@@ -1,4 +1,4 @@
-package com.sprint.www.httputils.http;
+package com.sprint.www.httputils.http.utils;
 
 import java.io.File;
 import java.util.Map;
@@ -13,11 +13,11 @@ public interface IHttpProcessor {
     IHttpProcessor setCache(boolean isUseCache);//是否使用缓存
     IHttpProcessor setHeader(Map<String, String> headers);//是否添加请求头
 
-    void post(String url, Map<String,Object> params,ICallBack callBack);
+    void post(String url, Map<String,String> params,ICallBack callBack);
 
-    void get(String url, Map<String,Object> params,ICallBack callBack);
+    void get(String url, Map<String,String> params,ICallBack callBack);
 
-    void uploadFile(String url, File[] files, String[] filekeys, String[] fileTypes, Map<String, Object> paramsMap,ProgressListener listener ,ICallBack callBack);
+    void uploadFile(String url, Map<String, File> filesMap, String[] fileTypes, Map<String, String> paramsMap,ProgressListener listener ,ICallBack callBack);
 
     void downLoadFile(String url, String fileDir,  ProgressListener listener, ICallBack callback);
 

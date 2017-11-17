@@ -1,4 +1,4 @@
-package com.sprint.www.httputils.http;
+package com.sprint.www.httputils.http.utils;
 
 public interface IConstants {
     /**

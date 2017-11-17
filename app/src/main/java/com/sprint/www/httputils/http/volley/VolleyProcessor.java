@@ -1,7 +1,6 @@
-package com.sprint.www.httputils.http;
+package com.sprint.www.httputils.http.volley;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -11,18 +10,16 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.sprint.www.httputils.http.utils.ICallBack;
+import com.sprint.www.httputils.http.utils.IConstants;
+import com.sprint.www.httputils.http.utils.IHttpProcessor;
+import com.sprint.www.httputils.http.utils.ProgressListener;
+import com.sprint.www.httputils.http.utils.State;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,7 +55,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     }
     /**使用POST*/
     @Override
-    public void post(String url, Map<String, Object> params, final ICallBack callBack) {
+    public void post(String url, Map<String, String> params, final ICallBack callBack) {
         String strUrl = appendParams(url, params);
         StringRequest stringRequest = getStringRequest(strUrl,Request.Method.POST,callBack);
         // 请用缓存
@@ -67,7 +64,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     }
     /**使用GET*/
     @Override
-    public void get(String url, Map<String, Object> params,  ICallBack callBack) {
+    public void get(String url, Map<String, String> params,  ICallBack callBack) {
         String strUrl = appendParams(url, params);
         StringRequest stringRequest = getStringRequest(strUrl,Request.Method.GET,callBack);
 
@@ -87,14 +84,18 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
                 strUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                callBack.onSuccess(response);
-                if (debug) Log.e(TAG,response);
+                if(callBack != null){
+                    callBack.onSuccess(response);
+                    if (debug) Log.e(TAG,response);
+                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                callBack.onFailure(State.FAILURE,error.toString());
-                if (debug) Log.e(TAG,error.toString());
+                if(callBack != null){
+                    callBack.onFailure(State.FAILURE,error.toString());
+                    if (debug) Log.e(TAG,error.toString());
+                }
             }
         }){
             @Override
@@ -116,7 +117,60 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
 
     /**文件上传*/
     @Override
-    public void uploadFile(String url, File[] files, String[] filekeys, String[] fileTypes, Map<String, Object> paramsMap,ProgressListener listener ,ICallBack callBack) {
+    public void uploadFile(String url, final Map<String, File> filesMap, String[] fileTypes, final Map<String, String> paramsMap, ProgressListener listener , final ICallBack callBack) {
+        PostUploadRequest mRequest = new PostUploadRequest(Request.Method.POST, url, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (callBack != null) {
+                    callBack.onFailure(State.FAILURE,error.toString());
+                    if (debug) Log.e(TAG,error.toString());
+                }
+            }
+        }, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (callBack != null) {
+                    callBack.onSuccess(response);
+                }
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> superHeader = super.getHeaders();
+                if (headers != null && headers.size() > 0) {
+                    superHeader = headers;
+                }
+                if (debug) Log.e(TAG,superHeader.toString());
+                return superHeader;
+            }
+
+            // 设置Body参数
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> tParams = super.getParams();
+                if (paramsMap != null && paramsMap.size() > 0) {
+                    tParams = paramsMap;
+                }
+                return tParams;
+            }
+
+            @Override
+            public Map<String, File> getUploadFiles() {
+                Map<String, File> mUploadFiles  = new HashMap<>();
+                if(filesMap != null){
+                    mUploadFiles = filesMap;
+                }
+//                if (files != null && files.length > 0 && filekeys != null && (filekeys.length == files.length)){
+//                   for (int i =0;i<files.length;i++){
+//                       mUploadFiles.put(filekeys[i],files[i]);
+//                   }
+//                }
+                return mUploadFiles;
+            }
+        };
+
+       // mRequest.setTag(TAG);
+        mQueue.add(mRequest);
 
     }
     /**文件下载*/
@@ -190,7 +244,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     /**
      * 拼接url
      */
-    private String appendParams(String url, Map<String, Object> params) {
+    private String appendParams(String url, Map<String, String> params) {
         if (TextUtils.isEmpty(url) || params == null || params.isEmpty()) {
             return url;
         }
@@ -202,7 +256,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
                 urlBuilder.append("&");
             }
         }
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
+        for (Map.Entry<String, String> entry : params.entrySet()) {
             urlBuilder.append(entry.getKey()).append("=").append(encode(entry.getValue().toString())).append("&");
         }
 

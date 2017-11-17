@@ -27,6 +27,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <Button
+                android:id="@+id/commit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onCommit"
+                android:text="Button" />
+
             <TextView
                 android:id="@+id/tv"
                 android:layout_width="match_parent"
@@ -37,7 +44,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/main_img"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:src="@mipmap/ic_launcher" />
         </LinearLayout>
+
+
     </ScrollView>
 
 </RelativeLayout>
