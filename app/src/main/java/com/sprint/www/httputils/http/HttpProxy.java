@@ -6,7 +6,9 @@ import com.sprint.www.httputils.http.utils.IHttpProcessor;
 import com.sprint.www.httputils.http.utils.ProgressListener;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -104,7 +106,7 @@ public class HttpProxy implements IHttpProcessor, IConstants {
      * @param callBack：回调接口，onFailure方法在请求失败时调用，onResponse方法在请求成功后调用，这两个方法都执行在UI线程。还可以重写onProgress方法，得到上传进度
      */
     @Override
-    public void uploadFile(String url, Map<String, File> filesMap, String[] fileTypes,
+    public void uploadFile(String url, Map<String, File> filesMap, List<String> fileTypes,
                            Map<String, String> paramsMap, ProgressListener listener, ICallBack callBack) {
         mIHttpProcessor.uploadFile(url,filesMap,fileTypes,paramsMap, listener,callBack);
     }

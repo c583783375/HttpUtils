@@ -1,6 +1,8 @@
 package com.sprint.www.httputils.http.utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +19,7 @@ public interface IHttpProcessor {
 
     void get(String url, Map<String,String> params,ICallBack callBack);
 
-    void uploadFile(String url, Map<String, File> filesMap, String[] fileTypes, Map<String, String> paramsMap,ProgressListener listener ,ICallBack callBack);
+    void uploadFile(String url, Map<String, File> filesMap, List<String> fileTypes, Map<String, String> paramsMap, ProgressListener listener , ICallBack callBack);
 
     void downLoadFile(String url, String fileDir,  ProgressListener listener, ICallBack callback);
 

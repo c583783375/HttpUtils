@@ -17,8 +17,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -104,7 +104,7 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
     }
     /**文件上传*/
     @Override
-    public void uploadFile(String url, Map<String, File> filesMap, String[] fileTypes,
+    public void uploadFile(String url, Map<String, File> filesMap, List<String> fileTypes,
                            Map<String, String> paramsMap, ProgressListener listener , ICallBack callBack) {
 
        // Map<String, File> filesMap = new HashMap<>();
@@ -113,10 +113,9 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
         MultipartBody.Builder requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM);
         //2.按顺序添加文件
-        Map<String, File> uploadFiles = new HashMap<>();
-        if(uploadFiles != null &&uploadFiles.size() > 0){
+        if(filesMap != null &&filesMap.size() > 0){
             int i = 0;
-            Iterator iter = uploadFiles.entrySet().iterator();
+            Iterator iter = filesMap.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry<String, File> entry = (Map.Entry) iter.next();
                 String key =  entry.getKey();
@@ -124,8 +123,8 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
                 // MediaType.parse() 里面是上传的文件类型。 "file/*" "image/*" "audio/*" "video/*"
                 // "image/jpeg; charset=utf-8" "text/*" "application/octet-stream"
                 String filetype = FILE_TYOE_DEF;
-                if(fileTypes != null && fileTypes.length > i){
-                    filetype = TextUtils.isEmpty(fileTypes[i])?  FILE_TYOE_DEF :fileTypes[i];
+                if(fileTypes != null && fileTypes.size() > i){
+                    filetype = TextUtils.isEmpty(fileTypes.get(i))?  FILE_TYOE_DEF :fileTypes.get(i);
                 }else{
                     filetype = FILE_TYOE_DEF;
                 }
@@ -138,24 +137,6 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
             }
         }
 
-
-//        //2.按顺序添加文件
-//        if(files != null && files.length > 0){
-//            for (int i = 0;i< files.length;i++){
-//                // MediaType.parse() 里面是上传的文件类型。 "file/*" "image/*" "audio/*" "video/*"
-//                // "image/jpeg; charset=utf-8" "text/*" "application/octet-stream"
-//                String filetype = FILE_TYOE_DEF;
-//                if(fileTypes != null && filekeys.length > i){
-//                    filetype = TextUtils.isEmpty(filekeys[i])?  FILE_TYOE_DEF :filekeys[i];
-//                }
-//                //没有上传进度
-//             //   RequestBody body = RequestBody.create(MediaType.parse(filetype), files[i]);
-//                ProgressRequestBody body = new ProgressRequestBody(i,MediaType.parse(filetype),files[i],listener);
-//
-//                // 参数分别为， 请求key ，文件名称 ， RequestBody
-//                requestBody.addFormDataPart(filekeys[i], files[i].getName(), body);
-//            }
-//        }
         //3.添加参数
         if (paramsMap != null) {
             // map 里面是请求中所需要的 key 和 value

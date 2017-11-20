@@ -21,6 +21,7 @@ import com.sprint.www.httputils.http.utils.State;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static android.net.Uri.encode;
@@ -117,7 +118,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
 
     /**文件上传*/
     @Override
-    public void uploadFile(String url, final Map<String, File> filesMap, String[] fileTypes, final Map<String, String> paramsMap, ProgressListener listener , final ICallBack callBack) {
+    public void uploadFile(String url, final Map<String, File> filesMap, List<String> fileTypes, final Map<String, String> paramsMap, ProgressListener listener , final ICallBack callBack) {
         PostUploadRequest mRequest = new PostUploadRequest(Request.Method.POST, url, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {

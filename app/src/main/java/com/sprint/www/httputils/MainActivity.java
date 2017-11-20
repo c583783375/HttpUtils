@@ -102,14 +102,15 @@ public class MainActivity extends AppCompatActivity {
         Map<String, File> filesMap = new HashMap<>();
         File file = new File(path.get(0));
         filesMap.put("img",file);
-
+        filesMap.put("img1",file);
 
         List<String> fileTypes = new ArrayList<>();
+        fileTypes.add("image");
         fileTypes.add("image");
 
         Map<String, String> paramsMap = new HashMap<>();//fileTypes.toArray(new String[fileTypes.size()])
         paramsMap.put("id","11");
-        HttpProxy.obtain().uploadFile(url, filesMap,null , paramsMap, new ProgressListener() {
+        HttpProxy.obtain().uploadFile(url, filesMap,fileTypes , paramsMap, new ProgressListener() {
             @Override
             public void onProgress(final long totalSize,final long currSize,final boolean done,final int id) {
                 Log.e(TAG,"上传中"+totalSize+"="+currSize+"="+done+"="+id);
