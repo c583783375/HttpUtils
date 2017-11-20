@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="GalleryTheme" parent="GalleryBaseTheme">
+    <style name="GalleryTheme" parent="GalleryBaseTheme" tools:ignore="ResourceName">
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
-    <style name="galleryBtnBackground" parent="GalleryBaseTheme">
+    <style name="galleryBtnBackground" parent="GalleryBaseTheme" tools:ignore="ResourceName">
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 

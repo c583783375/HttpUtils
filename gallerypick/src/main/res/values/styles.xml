@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="GalleryBaseTheme" parent="Theme.AppCompat.Light.NoActionBar" />
-
-
-    <style name="GalleryTheme" parent="GalleryBaseTheme" />
+    <style name="GalleryBaseTheme" parent="Theme.AppCompat.Light.NoActionBar" tools:ignore="ResourceName" />
 
 
-    <style name="galleryBtnBackground" parent="GalleryBaseTheme">
+    <style name="GalleryTheme" parent="GalleryBaseTheme" tools:ignore="ResourceName" />
+
+
+    <style name="galleryBtnBackground" parent="GalleryBaseTheme" tools:ignore="ResourceName">
         <item name="android:background">@null</item>
     </style>
 
 
     <!--PopupWindow动画-->
-    <style name="popupAnimation" parent="android:Animation">
+    <style name="popupAnimation" parent="android:Animation" tools:ignore="ResourceName">
         <item name="android:windowEnterAnimation">@anim/in_fade</item>
         <item name="android:windowExitAnimation">@anim/out_fade</item>
     </style>
