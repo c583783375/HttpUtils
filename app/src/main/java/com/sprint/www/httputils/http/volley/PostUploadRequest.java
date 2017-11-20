@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
-class PostUploadRequest extends Request<String> {
+public class PostUploadRequest extends Request<String> {
 
     private Response.Listener mListener;
 

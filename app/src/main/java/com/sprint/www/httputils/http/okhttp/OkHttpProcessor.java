@@ -156,10 +156,10 @@ public class OkHttpProcessor implements IHttpProcessor, IConstants {
     }
     /**文件下传*/
     @Override
-    public void downLoadFile(String url, String fileDir, ProgressListener listener, ICallBack callback) {
-
+    public void downLoadFile(String url,Map<String, String> params ,String fileDir, ProgressListener listener, ICallBack callback) {
+        String strUrl = appendParams(url, params);
         final Request request = new Request.Builder()
-                .url(url)
+                .url(strUrl)
                 .build();
         String filename = getNameFromUrl(url);
         executeAsyn_DownloadWithListener(request,fileDir,filename,listener,callback);

@@ -119,8 +119,8 @@ public class HttpProxy implements IHttpProcessor, IConstants {
      * @param callback：回调接口，onFailure方法在请求失败时调用，onResponse方法在请求成功后调用，这两个方法都执行在UI线程。还可以重写onProgress方法，得到下载进度
      */
     @Override
-    public void downLoadFile(String url, String fileDir, ProgressListener listener, ICallBack callback) {
-        mIHttpProcessor.downLoadFile(url,fileDir,listener,callback);
+    public void downLoadFile(String url,Map<String, String> params ,String fileDir, ProgressListener listener, ICallBack callback) {
+        mIHttpProcessor.downLoadFile(url,params,fileDir,listener,callback);
     }
     /**取消所有网络请求 */
     @Override

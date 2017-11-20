@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onCommit(View v){
-       uploadImage();
-      //  downFile();
+//       uploadImage();
+        downFile();
     }
 
     NumberFormat format = NumberFormat.getPercentInstance();// 获取格式化类实例
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         format.setMinimumFractionDigits(2);// 设置小数位
         String url = "http://106.14.217.169:8082/upload/2017-11-17/1510903638457ohy.jpg";
        // String url = "http://192.168.1.188:8888/1476329828897.jpg";
-        HttpProxy.obtain().downLoadFile(url, "down", new ProgressListener() {
+        HttpProxy.obtain().downLoadFile(url, null,"down", new ProgressListener() {
             @Override
             public void onProgress(final long totalSize, final long currSize, final boolean done, final int id) {
 

@@ -12,6 +12,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.sprint.www.httputils.http.utils.FileUtils;
 import com.sprint.www.httputils.http.utils.ICallBack;
 import com.sprint.www.httputils.http.utils.IConstants;
 import com.sprint.www.httputils.http.utils.IHttpProcessor;
@@ -20,6 +21,7 @@ import com.sprint.www.httputils.http.utils.State;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +120,9 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
 
     /**文件上传*/
     @Override
-    public void uploadFile(String url, final Map<String, File> filesMap, List<String> fileTypes, final Map<String, String> paramsMap, ProgressListener listener , final ICallBack callBack) {
+    public void uploadFile(String url, final Map<String, File> filesMap, List<String> fileTypes,
+                           final Map<String, String> paramsMap, ProgressListener listener ,
+                           final ICallBack callBack) {
         PostUploadRequest mRequest = new PostUploadRequest(Request.Method.POST, url, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -161,11 +165,6 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
                 if(filesMap != null){
                     mUploadFiles = filesMap;
                 }
-//                if (files != null && files.length > 0 && filekeys != null && (filekeys.length == files.length)){
-//                   for (int i =0;i<files.length;i++){
-//                       mUploadFiles.put(filekeys[i],files[i]);
-//                   }
-//                }
                 return mUploadFiles;
             }
         };
@@ -176,62 +175,66 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     }
     /**文件下载*/
     @Override
-    public void downLoadFile(String url, String fileDir,  ProgressListener listener, ICallBack callback) {
-        String filename =  getNameFromUrl(url);
-     /*   write2SDFromInput(url,filename,fileDir,listener,callback);*/
+    public void downLoadFile(String url, final Map<String, String> params, final String fileDir, final ProgressListener listener, final ICallBack callback) {
+        final String filename =  getNameFromUrl(url);
+        DownRequest dRequest = new DownRequest(Request.Method.GET, url, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (debug) Log.e(TAG,  "Volley is on Failure:操作取消,文件读取失败或者连接超时");
+                if (callback != null) {
+                    callback.onFailure(State.FAILURE,error.toString());
+                }
+            }
+        }, new Response.Listener<byte[]>() {// byte[]
+            @Override
+            public void onResponse(byte[] response) {
+                if (debug) Log.e(TAG,  "the request was successfully received, understood, and accepted.");
+                try {
+                    String savePath = savePath = isExistDir(fileDir);
+                    File file = new File(savePath, filename);
+                    FileUtils.saveFile(response, file,listener);
+                    if (callback != null) {
+                        callback.onSuccess(response.toString());
+                    }
+                }catch (IOException e){
+                    if (callback != null) {
+                        callback.onFailure(State.FAILURE,e.toString());
+                    }
+                    if (debug) Log.e(TAG,  "OkHttp response is not successful. Code is: " + e.toString());
+                    e.printStackTrace();
+                }catch (Exception e) {
+                    if (callback != null) {
+                        callback.onFailure(State.FAILURE,e.toString());
+                    }
+                    if (debug) Log.e(TAG,  "OkHttp response is not successful. Code is: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> superHeader = super.getHeaders();
+                if (headers != null && headers.size() > 0) {
+                    superHeader = headers;
+                }
+                return superHeader;
+            }
 
+            // 设置Body参数
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> tParams = super.getParams();
+                if (params != null && params.size() > 0) {
+                    tParams = params;
+                }
+                return tParams;
+            }
+        };
+
+     //   dRequest.setTag(mTag);
+        mQueue.add(dRequest);
     }
 
-/*
-    //将一个InoutStream里面的数据写入到SD卡中
-    public File write2SDFromInput(String fileUrl, String fileName,String fileDir, ProgressListener listener, ICallBack callback){
-
-        File file=null;
-        OutputStream output=null;
-        InputStream input = null;
-        try {
-            //创建一个URL对象
-            URL url=new URL(fileUrl);
-            //创建一个HTTP链接
-            HttpURLConnection urlConn=(HttpURLConnection)url.openConnection();
-            //使用IO流获取数据
-            input=urlConn.getInputStream();
-
-            //创建目录
-            String savePath = isExistDir(fileDir);
-            //创建文件
-            file = new File(savePath, fileName);
-            //写数据流
-            output=new FileOutputStream(file);
-            byte buffer[]=new byte[4*1024];//每次存4K
-            int temp;
-            //写入数据
-            while((temp=input.read(buffer))!=-1){
-                output.write(buffer,0,temp);
-            }
-            output.flush();
-        } catch (Exception e) {
-            System.out.println("写数据异常："+e);
-        }
-        finally{
-            try {
-                if(output != null){
-                    output.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                if(input != null){
-                    input.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return file;
-    }
-*/
 
 
 
