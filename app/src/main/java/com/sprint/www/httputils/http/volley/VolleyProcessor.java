@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -123,7 +124,7 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     public void uploadFile(String url, final Map<String, File> filesMap, List<String> fileTypes,
                            final Map<String, String> paramsMap, ProgressListener listener ,
                            final ICallBack callBack) {
-        PostUploadRequest mRequest = new PostUploadRequest(Request.Method.POST, url, new Response.ErrorListener() {
+        PostUploadRequest mRequest = new PostUploadRequest(Request.Method.POST, url,listener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (callBack != null) {
@@ -175,14 +176,84 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
     }
     /**文件下载*/
     @Override
-    public void downLoadFile(String url, final Map<String, String> params, final String fileDir, final ProgressListener listener, final ICallBack callback) {
+    public void downLoadFile(String url, final Map<String, String> params, final String fileDir,
+                             final ProgressListener listener, final ICallBack callback) {
+
+       // Request request =  downLoadByteFile(url,params,fileDir,listener,callback);
+        Request request =  downLoadInputStreamFile(url,params,fileDir,listener,callback);
+
+
+     //   request.setTag(mTag);
+        mQueue.add(request);
+    }
+    private Request downLoadInputStreamFile(String url, final Map<String, String> params, final String fileDir,
+                                     final ProgressListener listener, final ICallBack callback){
+        final String filename =  getNameFromUrl(url);
+        DownInputStreamRequest disr = new DownInputStreamRequest(Request.Method.GET,url,new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (debug) Log.e(TAG,  "Volley is on Failure:操作取消,文件读取失败或者连接超时");
+                if (callback != null) {
+                    callback.onFailure(State.NETWORK_FAILURE,error.toString());
+                }
+            }
+        }, new Response.Listener<NetworkResponse>() {
+            @Override
+            public void onResponse(NetworkResponse response) {
+                if (debug) Log.e(TAG,  "the request was successfully received, understood, and accepted.");
+                try {
+                    String savePath = isExistDir(fileDir);
+                    File file = new File(savePath, filename);
+                    FileUtils.saveFile(response, file,listener);
+                    if (callback != null) {
+                        callback.onSuccess(response.toString());
+                    }
+                } catch (IOException e){
+                    if (callback != null) {
+                        callback.onFailure(State.FAILURE,e.toString());
+                    }
+                    if (debug) Log.e(TAG,  "OkHttp response is not successful. Code is: " + e.toString());
+                    e.printStackTrace();
+                }catch (Exception e) {
+                    if (callback != null) {
+                        callback.onFailure(State.FAILURE,e.toString());
+                    }
+                    if (debug) Log.e(TAG,  "OkHttp response is not successful. Code is: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> superHeader = super.getHeaders();
+                if (headers != null && headers.size() > 0) {
+                    superHeader = headers;
+                }
+                return superHeader;
+            }
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> tParams = super.getParams();
+                if (params != null && params.size() > 0) {
+                    tParams = params;
+                }
+                return tParams;
+            }
+        };
+        return disr;
+    }
+
+    /**下载文件*/
+    private Request downLoadByteFile(String url, final Map<String, String> params, final String fileDir,
+                                  final ProgressListener listener, final ICallBack callback) {
         final String filename =  getNameFromUrl(url);
         DownRequest dRequest = new DownRequest(Request.Method.GET, url, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (debug) Log.e(TAG,  "Volley is on Failure:操作取消,文件读取失败或者连接超时");
                 if (callback != null) {
-                    callback.onFailure(State.FAILURE,error.toString());
+                    callback.onFailure(State.NETWORK_FAILURE,error.toString());
                 }
             }
         }, new Response.Listener<byte[]>() {// byte[]
@@ -190,13 +261,13 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
             public void onResponse(byte[] response) {
                 if (debug) Log.e(TAG,  "the request was successfully received, understood, and accepted.");
                 try {
-                    String savePath = savePath = isExistDir(fileDir);
+                    String savePath  = isExistDir(fileDir);
                     File file = new File(savePath, filename);
                     FileUtils.saveFile(response, file,listener);
                     if (callback != null) {
                         callback.onSuccess(response.toString());
                     }
-                }catch (IOException e){
+                } catch (IOException e){
                     if (callback != null) {
                         callback.onFailure(State.FAILURE,e.toString());
                     }
@@ -230,12 +301,8 @@ public class VolleyProcessor implements IHttpProcessor, IConstants {
                 return tParams;
             }
         };
-
-     //   dRequest.setTag(mTag);
-        mQueue.add(dRequest);
+        return dRequest;
     }
-
-
 
 
     /**取消所有网络请求 */

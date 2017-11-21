@@ -5,6 +5,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+
+
 public class DownRequest extends Request<byte[]> {
 
     private final Response.Listener<byte[]> mListener;
@@ -26,4 +28,5 @@ public class DownRequest extends Request<byte[]> {
             mListener.onResponse(response);
         }
     }
+
 }

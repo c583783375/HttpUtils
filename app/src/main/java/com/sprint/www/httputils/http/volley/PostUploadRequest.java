@@ -6,6 +6,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.sprint.www.httputils.http.utils.ProgressListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class PostUploadRequest extends Request<String> {
 
     private Response.Listener mListener;
-
+    private  ProgressListener mPListener;
     private MultipartBody mMultiPartEntity = new MultipartBody();
 
     @Override
@@ -42,9 +43,10 @@ public class PostUploadRequest extends Request<String> {
         return null;
     }
 
-    public PostUploadRequest(int method, String url, Response.ErrorListener listener, Response.Listener mListener) {
-        super(method, url, listener);
+    public PostUploadRequest(int method, String url, ProgressListener listener, Response.ErrorListener errorListener, Response.Listener mListener) {
+        super(method, url, errorListener);
         this.mListener = mListener;
+        this.mPListener =listener;
         // 超时设置 10 分钟
         setRetryPolicy(new DefaultRetryPolicy(10 * 60 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         setShouldCache(false);
@@ -72,8 +74,10 @@ public class PostUploadRequest extends Request<String> {
 //            // 文件部分
             final Map<String, File> uploadFiles = getUploadFiles();
             if (uploadFiles != null && uploadFiles.size() > 0) {
+                int id = 0;
                 for (Map.Entry<String, File> entry : uploadFiles.entrySet()) {
-                    mMultiPartEntity.addFilePart(entry.getKey(), entry.getValue());
+                    mMultiPartEntity.addFilePart(entry.getKey(), entry.getValue(),mPListener,id);
+                    id ++;
                 }
             }
 

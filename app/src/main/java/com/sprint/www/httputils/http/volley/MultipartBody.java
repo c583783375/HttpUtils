@@ -2,6 +2,8 @@ package com.sprint.www.httputils.http.volley;
 
 import android.text.TextUtils;
 
+import com.sprint.www.httputils.http.utils.ProgressListener;
+
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -98,7 +100,7 @@ public class MultipartBody {
      * @param key
      * @param file
      */
-    public void addFilePart(final String key, final File file) {
+    public void addFilePart(final String key, final File file, ProgressListener listener, int id) {
         InputStream fin = null;
         try {
             fin = new FileInputStream(file);
@@ -109,9 +111,15 @@ public class MultipartBody {
             mOutputStream.write(NEW_LINE_STR.getBytes());
 
             final byte[] tmp = new byte[4096];
+            //总的文件大小
+            long totalSize = file.length();
             int len = 0;
+            long currSize = 0;
             while ((len = fin.read(tmp)) != -1) {
                 mOutputStream.write(tmp, 0, len);
+                currSize += len;
+                //回调,进度监听
+                listener.onProgress(totalSize, currSize, totalSize == currSize, id);
             }
             mOutputStream.write(NEW_LINE_STR.getBytes());
             mOutputStream.flush();
